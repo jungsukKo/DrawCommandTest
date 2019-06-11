@@ -1,60 +1,49 @@
-﻿// copy form : https://github.com/przemyslawzaworski/Unity3D-CG-programming/blob/master/ProceduralGeometry.shader
-Shader "ProceduralGeometry"
+﻿Shader "ProceduralGeometry"
 {
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
 	}
-		SubShader
+
+	SubShader
 	{
 		Pass
 		{
 			CGPROGRAM
-			#include "UnityCG.cginc"
 			#pragma target 4.5  
-			#pragma vertex vertex_shader
-			#pragma fragment pixel_shader
+			#pragma vertex vert
+			#pragma fragment frag
 
 			sampler2D _MainTex;
-			float4 _MainTex_ST;
-			float4  _LightColor0;
 
 			struct Point
 			{
 				float3 vertex;
-				float3 normal;
-				float4 tangent;
 				float2 uv;
 			};
 
 			StructuredBuffer<Point> points;
 
-			struct custom_type
+			struct v2f
 			{
 				float4 position : SV_POSITION;
-				float4 color : COLOR;
 				float2 uv : TEXCOORD0;
 			};
 
-			custom_type vertex_shader(uint id : SV_VertexID, uint inst : SV_InstanceID)
+			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			{
-				custom_type vs;
-				float4 vertex_position = float4(points[id].vertex,1.0f);
-				vertex_position.x += inst * 1;
+				v2f vs;
+				float4 pos = float4(points[id].vertex,1.0f);
+				pos.x += inst * 1;
 
-				float4 vertex_normal = float4(points[id].normal, 1.0f);
-				vs.position = mul(UNITY_MATRIX_VP, vertex_position);
-				vs.uv = TRANSFORM_TEX(points[id].uv, _MainTex);
-				float3 NormalDirection = normalize(vertex_normal.xyz);
-				float4 AmbientLight = UNITY_LIGHTMODEL_AMBIENT;
-				float4 LightDirection = normalize(_WorldSpaceLightPos0);
-				vs.color = saturate(dot(LightDirection, NormalDirection)) * _LightColor0 + AmbientLight;
+				vs.position = mul(UNITY_MATRIX_VP, pos);
+				vs.uv = points[id].uv;
 				return vs;
 			}
 
-			float4 pixel_shader(custom_type ps) : SV_Target
+			float4 frag(v2f ps) : SV_Target
 			{
-				return tex2D(_MainTex, ps.uv) * ps.color;
+				return tex2D(_MainTex, ps.uv);
 			}
 
 			ENDCG

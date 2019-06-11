@@ -12,8 +12,6 @@ No need to compute data at cpu if you using "indirect" and "compute"
 public struct Point
 {
     public Vector3 vertex;
-    public Vector3 normal;
-    public Vector4 tangent;
     public Vector2 uv;
 }
 
@@ -133,21 +131,15 @@ public class DrawTest : MonoBehaviour
     public static ComputeBuffer GetVertices(Mesh mesh)
     {
         List<Vector3> pos = new List<Vector3>();
-        List<Vector3> normal = new List<Vector3>();
-        List<Vector4> tangent = new List<Vector4>();
         List<Vector2> uv = new List<Vector2>();
 
         mesh.GetVertices(pos);
-        mesh.GetNormals(normal);
-        mesh.GetTangents(tangent);
         mesh.GetUVs(0, uv);
 
         Point[] points = new Point[pos.Count];
         for (int i = 0; i < pos.Count; ++i)
         {
             points[i].vertex = pos[i];
-            points[i].normal = normal[i];
-            points[i].tangent = tangent[i];
             points[i].uv = uv[i];
         }
 
@@ -163,8 +155,6 @@ public class DrawTest : MonoBehaviour
         for (int i = 0; i < vertCount; ++i)
         {
             points[i].vertex = mesh.vertices[mesh.triangles[i]];
-            points[i].normal = mesh.normals[mesh.triangles[i]];
-            points[i].tangent = mesh.tangents[mesh.triangles[i]];
             points[i].uv = mesh.uv[mesh.triangles[i]];
         }
 
